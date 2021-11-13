@@ -19,7 +19,7 @@
 #define GBOARD_ORIGIN_X 4
 #define GBOARD_ORIGIN_Y 2
 
-int gameBoardInfo[GBOARD_HEIGHT + 1][GBOARD_WIDTH + 2];     // Ãæµ¹°Ë»ç¿ë ÇÊµå
+int gameBoardInfo[GBOARD_HEIGHT + 1][GBOARD_WIDTH + 2];     // ï¿½æµ¹ï¿½Ë»ï¿½ï¿½ ï¿½Êµï¿½
 
 
 void SetCurrentCursorPos(int x, int y);
@@ -35,33 +35,18 @@ void BlockDown();
 int DetectCollison(int curX, int curY);
 void ProcessKeyInput();
 void RedrawBoard();
+void DrawOneStage();
 
 int main()
 {
     int i;
     RemoveCursor();
 
-    GameBoardInfoinitial();     //º¸µå¹è¿­ ÃÊ±âÈ­
+    GameBoardInfoinitial();     //ï¿½ï¿½ï¿½ï¿½è¿­ ï¿½Ê±ï¿½È­
 
     DrawGameBoard();
 
-
-
-    for (i = 0; i < 10; i++)
-    {
-        gameBoardInfo[10 + i][5] = 1;
-        if ((i > 6) || (i <= 3))
-            gameBoardInfo[10 + i][15] = 1;
-        gameBoardInfo[10 + i][24] = 1;
-    }
-    for (i = 0; i < 20; i++)
-    {
-        if (((i > 6) || (i <= 3)) && ((i > 16) | (i <= 13)))
-        {
-            gameBoardInfo[20][5 + i] = 1;
-            gameBoardInfo[10][5 + i] = 1;
-        }
-    }
+    DrawOneStage();
 
     RedrawBoard();
 
@@ -70,7 +55,7 @@ int main()
         ProcessKeyInput();
     }
 
-    getchar();              //Á¾·áÀü ´ë±â½Ã°£ È­¸é¿¡ ±ÛÀÚ º¸±â ½È¾î¼­ ¸¸µé¾ú½À´Ï´Ù.
+    getchar();              //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ã°ï¿½ È­ï¿½é¿¡ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½È¾î¼­ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.
 
     return 0;
 }
@@ -101,92 +86,91 @@ void RemoveCursor()
     SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &curInfo);
 }
 
-
 void DrawGameBoard()
 {
     int x, y;
 
-    //¸ÞÀÎº¸µå
+    //ï¿½ï¿½ï¿½Îºï¿½ï¿½ï¿½
     for (y = 0; y <= GBOARD_HEIGHT; y++)
     {
         SetCurrentCursorPos(GBOARD_ORIGIN_X, GBOARD_ORIGIN_Y + y);
 
         if (y == GBOARD_HEIGHT)
-            printf("¦¦");
+            printf("ï¿½ï¿½");
         else if (y == 0)
-            printf("¦£");
+            printf("ï¿½ï¿½");
         else
-            printf("¦¢");
+            printf("ï¿½ï¿½");
     }
     for (y = 0; y <= GBOARD_HEIGHT; y++)
     {
         SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 1) * 2, GBOARD_ORIGIN_Y + y);
 
         if (y == GBOARD_HEIGHT)
-            printf("¦¥");
+            printf("ï¿½ï¿½");
         else if (y == 0)
-            printf("¦¤");
+            printf("ï¿½ï¿½");
         else
-            printf("¦¢");
+            printf("ï¿½ï¿½");
     }
     for (x = 1; x < GBOARD_WIDTH + 1; x++)
     {
         SetCurrentCursorPos(GBOARD_ORIGIN_X + x * 2, GBOARD_ORIGIN_Y);
-        printf("¦¡");
+        printf("ï¿½ï¿½");
     }
     for (x = 1; x < GBOARD_WIDTH + 1; x++)
     {
         SetCurrentCursorPos(GBOARD_ORIGIN_X + x * 2, GBOARD_ORIGIN_Y + GBOARD_HEIGHT);
-        printf("¦¡");
+        printf("ï¿½ï¿½");
     }
 
-    //»çÀÌµå
+    //ï¿½ï¿½ï¿½Ìµï¿½
     for (y = 0; y <= GBOARD_HEIGHT; y++)
     {
         SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 2) * 2, GBOARD_ORIGIN_Y + y);
 
         if (y == GBOARD_HEIGHT)
-            printf("¦¦");
+            printf("ï¿½ï¿½");
         else if (y == 0)
-            printf("¦£");
+            printf("ï¿½ï¿½");
         else
-            printf("¦¢");
+            printf("ï¿½ï¿½");
     }
     for (y = 0; y <= GBOARD_HEIGHT; y++)
     {
         SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 2) * 2 + SIDE_WIDTH * 2, GBOARD_ORIGIN_Y + y);
 
         if (y == GBOARD_HEIGHT)
-            printf("¦¥");
+            printf("ï¿½ï¿½");
         else if (y == 0)
-            printf("¦¤");
+            printf("ï¿½ï¿½");
         else
-            printf("¦¢");
+            printf("ï¿½ï¿½");
     }
     for (x = 1; x < SIDE_WIDTH; x++)
     {
         SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 2) * 2 + x * 2, GBOARD_ORIGIN_Y);
-        printf("¦¡");
+        printf("ï¿½ï¿½");
     }
     for (x = 1; x < SIDE_WIDTH; x++)
     {
         SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 2) * 2 + x * 2, GBOARD_ORIGIN_Y + GBOARD_HEIGHT);
-        printf("¦¡");
+        printf("ï¿½ï¿½");
     }
     for (x = 1; x < SIDE_WIDTH; x++)
     {
         SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 2) * 2 + x * 2, GBOARD_ORIGIN_Y + GBOARD_HEIGHT / 4);
-        printf("¦¡");
+        printf("ï¿½ï¿½");
     }
     for (x = 1; x < SIDE_WIDTH; x++)
     {
         SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 2) * 2 + x * 2, GBOARD_ORIGIN_Y + GBOARD_HEIGHT / 4 * 2);
-        printf("¦¡");
+        printf("ï¿½ï¿½");
     }
     for (x = 1; x < SIDE_WIDTH; x++)
     {
         SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 2) * 2 + x * 2, GBOARD_ORIGIN_Y + GBOARD_HEIGHT / 4 * 3);
-        printf("¦¡");
+        printf("ï¿½ï¿½");
     }
 
     SetCurrentCursorPos(GBOARD_ORIGIN_X + GBOARD_WIDTH - 2, GBOARD_ORIGIN_Y + GBOARD_HEIGHT / 2);
@@ -198,7 +182,7 @@ void GameBoardInfoinitial()
 {
     int x, y;
 
-    for (y = 0; y < GBOARD_HEIGHT + 1; y++)             // ÀÏ´Ü ÀüºÎ 0À¸·Î ÃÊ±âÈ­ 
+    for (y = 0; y < GBOARD_HEIGHT + 1; y++)             // ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ 0ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­ 
     {
         for (x = 0; x < GBOARD_WIDTH + 2; x++)
             gameBoardInfo[y][x] = 0;
@@ -286,9 +270,9 @@ int DetectCollison(int curX, int curY)
     int arrX = (curX - GBOARD_ORIGIN_X) / 2;
     int arrY = curY - GBOARD_ORIGIN_Y;
 
-    if (gameBoardInfo[arrY][arrX] == 1)
-        return 0;
-    return 1;                   //¹®Á¦°¡ ¾øÀ¸¸é 1 ¹ÝÈ¯
+    if (gameBoardInfo[arrY][arrX] == 0)
+        return 1;
+    return 0;                   //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 1 ï¿½ï¿½È¯
 }
 
 
@@ -345,7 +329,11 @@ void RedrawBoard()
             SetCurrentCursorPos(cursX, cursY);
             if (gameBoardInfo[y][x] == 1)
             {
-                printf("¡á");
+                printf("â– ");
+            }
+            else if (gameBoardInfo[y][x] == 2)
+            {
+                printf("â–¡");
             }
             else { printf("  "); }
         }
@@ -354,4 +342,54 @@ void RedrawBoard()
     SetCurrentCursorPos(pos.X, pos.Y);
     printf("");
     SetCurrentCursorPos(pos.X, pos.Y);
+}
+
+void DrawOneStage()
+{
+    int i, j;
+    for (int i = 2; i < GBOARD_HEIGHT; i++)
+    {
+        for (int j = 2; j < GBOARD_HEIGHT; j++)
+        {
+            if (i % 2 == 0)
+                gameBoardInfo[i][j] = 2;
+            if (i % 3 == 0)
+                gameBoardInfo[i][j] = 2;
+            if (j % 3 == 0)
+                gameBoardInfo[i][j] = 2;
+        }
+    }
+    for (int i = 2; i < GBOARD_HEIGHT; i++)
+    {
+        for (int j = 2; j < GBOARD_HEIGHT; j++)
+        {
+            if (i % 4 == j % 4)
+                gameBoardInfo[i][j] = 1;
+            if ((GBOARD_HEIGHT - i) % 5 == (j) % 5)
+                gameBoardInfo[i][j] = 2;
+        }
+    }
+    for (i = 0; i < 10; i++)
+    {
+        gameBoardInfo[10 + i][5] = 1;
+        if ((i > 6) || (i <= 3))
+            gameBoardInfo[10 + i][15] = 1;
+        gameBoardInfo[10 + i][24] = 1;
+    }
+    for (i = 0; i < 20; i++)
+    {
+        if (((i > 6) || (i <= 3)) && ((i > 16) | (i <= 13)))
+        {
+            gameBoardInfo[20][5 + i] = 1;
+            gameBoardInfo[10][5 + i] = 1;
+        }
+    }
+    COORD curPos = GetCurrentCursorPos();
+    for (i = 0; i < 4; i++)
+    {
+        for (j = 0; j < 4; j++)
+        {
+            gameBoardInfo[curPos.Y + i - 5][curPos.X + j + 10] = 0;
+        }
+    }
 }
