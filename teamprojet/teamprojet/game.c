@@ -2,17 +2,17 @@
 
 #include <stdio.h>
 #include <windows.h>
-#include <time.h>
 #include <conio.h>
 
 #define LEFT 75
 #define RIGHT 77
 #define UP 72
+#define DOWN 80
 #define SPACE 32
 
 /*Size of gameboard*/
-#define GBOARD_WIDTH 30
-#define GBOARD_HEIGHT 30
+#define GBOARD_WIDTH 26
+#define GBOARD_HEIGHT 26
 #define SIDE_WIDTH 10
 
 /*Starting point of gameboard*/
@@ -28,14 +28,47 @@ COORD GetCurrentCursorPos(void);
 void RemoveCursor();
 void DrawGameBoard();
 void GameBoardInfoinitial();
+void BlockRight();
+void BlockLeft();
+void BlockUp();
+void BlockDown();
+int DetectCollison(int curX, int curY);
+void ProcessKeyInput();
+void RedrawBoard();
 
 int main()
 {
+    int i;
     RemoveCursor();
 
     GameBoardInfoinitial();     //보드배열 초기화
 
     DrawGameBoard();
+
+
+
+    for (i = 0; i < 10; i++)
+    {
+        gameBoardInfo[10 + i][5] = 1;
+        if ((i > 6) || (i <= 3))
+            gameBoardInfo[10 + i][15] = 1;
+        gameBoardInfo[10 + i][24] = 1;
+    }
+    for (i = 0; i < 20; i++)
+    {
+        if (((i > 6) || (i <= 3)) && ((i > 16) | (i <= 13)))
+        {
+            gameBoardInfo[20][5 + i] = 1;
+            gameBoardInfo[10][5 + i] = 1;
+        }
+    }
+
+    RedrawBoard();
+
+    while (1)
+    {
+        ProcessKeyInput();
+    }
 
     getchar();              //종료전 대기시간 화면에 글자 보기 싫어서 만들었습니다.
 
@@ -48,7 +81,7 @@ void SetCurrentCursorPos(int x, int y)
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
 }
 
-COORD GetCurrentCursorPos(void)
+COORD GetCurrentCursorPos()
 {
     COORD curPoint;
     CONSOLE_SCREEN_BUFFER_INFO curInfo;
@@ -137,7 +170,7 @@ void DrawGameBoard()
     }
     for (x = 1; x < SIDE_WIDTH; x++)
     {
-        SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 2) * 2 +x * 2, GBOARD_ORIGIN_Y + GBOARD_HEIGHT);
+        SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 2) * 2 + x * 2, GBOARD_ORIGIN_Y + GBOARD_HEIGHT);
         printf("─");
     }
     for (x = 1; x < SIDE_WIDTH; x++)
@@ -156,7 +189,9 @@ void DrawGameBoard()
         printf("─");
     }
 
-    SetCurrentCursorPos(GBOARD_ORIGIN_X + GBOARD_WIDTH - 2, GBOARD_ORIGIN_Y);
+    SetCurrentCursorPos(GBOARD_ORIGIN_X + GBOARD_WIDTH - 2, GBOARD_ORIGIN_Y + GBOARD_HEIGHT / 2);
+    printf("");
+    SetCurrentCursorPos(GBOARD_ORIGIN_X + GBOARD_WIDTH - 2, GBOARD_ORIGIN_Y + GBOARD_HEIGHT / 2);
 }
 
 void GameBoardInfoinitial()
@@ -176,6 +211,147 @@ void GameBoardInfoinitial()
     }
     for (x = 0; x < GBOARD_WIDTH + 2; x++)
     {
+        gameBoardInfo[0][x] = 1;
         gameBoardInfo[GBOARD_HEIGHT][x] = 1;
     }
+}
+
+void BlockRight()
+{
+    COORD curPos = GetCurrentCursorPos();
+
+    if (!DetectCollison(curPos.X + 2, curPos.Y))
+        return;
+
+    printf("  ");
+    curPos.X += 2;
+    printf("");
+    SetCurrentCursorPos(curPos.X, curPos.Y);
+    SetCurrentCursorPos(curPos.X, curPos.Y);
+}
+
+void BlockLeft()
+{
+    COORD curPos = GetCurrentCursorPos();
+
+    if (!DetectCollison(curPos.X - 2, curPos.Y))
+        return;
+
+    printf("  ");
+    curPos.X -= 2;
+    SetCurrentCursorPos(curPos.X, curPos.Y);
+    printf("");
+    SetCurrentCursorPos(curPos.X, curPos.Y);
+}
+
+void BlockUp()
+{
+    COORD curPos = GetCurrentCursorPos();
+
+    if (!DetectCollison(curPos.X, curPos.Y - 1))
+        return;
+
+    printf("  ");
+    curPos.Y -= 1;
+    SetCurrentCursorPos(curPos.X, curPos.Y);
+    printf("");
+    SetCurrentCursorPos(curPos.X, curPos.Y);
+}
+
+void BlockDown()
+{
+    COORD curPos = GetCurrentCursorPos();
+
+    if (!DetectCollison(curPos.X, curPos.Y + 1))
+        return;
+
+    printf("  ");
+    curPos.Y += 1;
+    SetCurrentCursorPos(curPos.X, curPos.Y);
+    printf("");
+    SetCurrentCursorPos(curPos.X, curPos.Y);
+}
+
+void Blockout()
+{
+    COORD curPos = GetCurrentCursorPos();
+
+    SetCurrentCursorPos(curPos.X, curPos.Y);
+    printf("  ");
+}
+
+
+int DetectCollison(int curX, int curY)
+{
+    int arrX = (curX - GBOARD_ORIGIN_X) / 2;
+    int arrY = curY - GBOARD_ORIGIN_Y;
+
+    if (gameBoardInfo[arrY][arrX] == 1)
+        return 0;
+    return 1;                   //문제가 없으면 1 반환
+}
+
+
+void ProcessKeyInput()
+{
+    int key, i;
+
+    for (i = 0; i < 100; i++)
+    {
+        if (_kbhit() != 0)
+        {
+            key = _getch();
+
+            switch (key)
+            {
+            case LEFT:
+                BlockLeft();
+                break;
+            case RIGHT:
+                BlockRight();
+                break;
+            case UP:
+                BlockUp();
+                break;
+            case DOWN:
+                BlockDown();
+                break;
+            case SPACE:
+                Blockout();
+                break;
+            default:
+                break;
+            }
+        }
+        //Sleep(10);
+    }
+
+}
+
+void RedrawBoard()
+{
+    COORD pos;
+    int x, y;
+    int cursX, cursY;
+
+    pos = GetCurrentCursorPos();
+
+    for (y = 1; y < GBOARD_HEIGHT; y++)
+    {
+        for (x = 1; x < GBOARD_WIDTH + 1; x++)
+        {
+            cursX = x * 2 + GBOARD_ORIGIN_X;
+            cursY = y + GBOARD_ORIGIN_Y;
+            SetCurrentCursorPos(cursX, cursY);
+            if (gameBoardInfo[y][x] == 1)
+            {
+                printf("■");
+            }
+            else { printf("  "); }
+        }
+    }
+
+    SetCurrentCursorPos(pos.X, pos.Y);
+    printf("");
+    SetCurrentCursorPos(pos.X, pos.Y);
 }
