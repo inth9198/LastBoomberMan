@@ -17,8 +17,8 @@
 #define SIDE_WIDTH 10
 
 /*Starting point of gameboard*/
-#define GBOARD_ORIGIN_X 4
-#define GBOARD_ORIGIN_Y 2
+#define GBOARD_ORIGIN_X 16
+#define GBOARD_ORIGIN_Y 10
 
 int gameBoardInfo[GBOARD_HEIGHT + 1][GBOARD_WIDTH + 2];     // 충돌검사용 필드
 
@@ -26,6 +26,7 @@ void SetCurrentCursorPos(int x, int y);
 COORD GetCurrentCursorPos(void);
 
 void RemoveCursor();
+void DrawGameTitle();
 void DrawGameBoard();
 void GameBoardInfoinitial();
 void BlockRight();
@@ -41,8 +42,10 @@ void InstallBomb();
 
 int main()
 {
-    system("mode con cols=88 lines=32");
+    system("mode con cols=110 lines=40");
+    system("title LAST BOMBERMAN");
     RemoveCursor();
+    DrawGameTitle();
 
     GameBoardInfoinitial();     //보드배열 초기화
 
@@ -86,6 +89,22 @@ void RemoveCursor()
     GetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &curInfo);
     curInfo.bVisible = 0;
     SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &curInfo);
+}
+
+
+void DrawGameTitle() {
+
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 6);
+
+    printf("\n");
+    printf("    ■    ■■  ■■■ ■■■  ■■     ■■   ■■  ■■ ■■   ■■■ ■■    ■■  ■■  ■■  ■    ■\n" );
+    printf("    ■   ■  ■ ■       ■    ■  ■ ■    ■ ■ ■■ ■ ■  ■ ■     ■ ■   ■ ■■ ■ ■  ■ ■■  ■\n");
+    printf("    ■   ■■■ ■■■   ■    ■■   ■    ■ ■  ■  ■ ■■   ■■   ■■    ■  ■  ■ ■■■ ■ ■ ■\n");
+    printf("    ■   ■  ■     ■   ■    ■  ■ ■    ■ ■  ■  ■ ■  ■ ■     ■ ■   ■  ■  ■ ■  ■ ■  ■■\n");
+    printf("    ■■ ■  ■ ■■■   ■    ■■■   ■■   ■      ■ ■■■ ■■■ ■  ■  ■      ■ ■  ■ ■    ■");
+
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+
 }
 
 
