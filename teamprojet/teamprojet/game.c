@@ -1,7 +1,8 @@
-#pragma warning(disable : 4996)
+﻿#pragma warning(disable : 4996)
 
 #include <stdio.h>
 #include <windows.h>
+#include <time.h>
 #include <conio.h>
 
 #define LEFT 75
@@ -19,8 +20,7 @@
 #define GBOARD_ORIGIN_X 4
 #define GBOARD_ORIGIN_Y 2
 
-int gameBoardInfo[GBOARD_HEIGHT + 1][GBOARD_WIDTH + 2];     // �浹�˻�� �ʵ�
-
+int gameBoardInfo[GBOARD_HEIGHT + 1][GBOARD_WIDTH + 2];     // 충돌검사용 필드
 
 void SetCurrentCursorPos(int x, int y);
 COORD GetCurrentCursorPos(void);
@@ -36,18 +36,20 @@ int DetectCollison(int curX, int curY);
 void ProcessKeyInput();
 void RedrawBoard();
 void DrawOneStage();
+void InstallBomb();
+
 
 int main()
 {
-    int i;
+    system("mode con cols=88 lines=32");
     RemoveCursor();
 
-    GameBoardInfoinitial();     //����迭 �ʱ�ȭ
+    GameBoardInfoinitial();     //보드배열 초기화
 
     DrawGameBoard();
 
     DrawOneStage();
-
+    //Sleep(1000);
     RedrawBoard();
 
     while (1)
@@ -55,7 +57,7 @@ int main()
         ProcessKeyInput();
     }
 
-    getchar();              //������ ���ð� ȭ�鿡 ���� ���� �Ⱦ ��������ϴ�.
+    getchar();              //종료전 대기시간 화면에 글자 보기 싫어서 만들었습니다.
 
     return 0;
 }
@@ -86,103 +88,105 @@ void RemoveCursor()
     SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &curInfo);
 }
 
+
 void DrawGameBoard()
 {
     int x, y;
 
-    //���κ���
+    //메인보드
     for (y = 0; y <= GBOARD_HEIGHT; y++)
     {
         SetCurrentCursorPos(GBOARD_ORIGIN_X, GBOARD_ORIGIN_Y + y);
 
         if (y == GBOARD_HEIGHT)
-            printf("��");
+            printf("└");
         else if (y == 0)
-            printf("��");
+            printf("┌");
         else
-            printf("��");
+            printf("│");
     }
     for (y = 0; y <= GBOARD_HEIGHT; y++)
     {
         SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 1) * 2, GBOARD_ORIGIN_Y + y);
 
         if (y == GBOARD_HEIGHT)
-            printf("��");
+            printf("┘");
         else if (y == 0)
-            printf("��");
+            printf("┐");
         else
-            printf("��");
+            printf("│");
     }
     for (x = 1; x < GBOARD_WIDTH + 1; x++)
     {
         SetCurrentCursorPos(GBOARD_ORIGIN_X + x * 2, GBOARD_ORIGIN_Y);
-        printf("��");
+        printf("─");
     }
     for (x = 1; x < GBOARD_WIDTH + 1; x++)
     {
         SetCurrentCursorPos(GBOARD_ORIGIN_X + x * 2, GBOARD_ORIGIN_Y + GBOARD_HEIGHT);
-        printf("��");
+        printf("─");
     }
 
-    //���̵�
+    //사이드
     for (y = 0; y <= GBOARD_HEIGHT; y++)
     {
         SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 2) * 2, GBOARD_ORIGIN_Y + y);
 
         if (y == GBOARD_HEIGHT)
-            printf("��");
+            printf("└");
         else if (y == 0)
-            printf("��");
+            printf("┌");
         else
-            printf("��");
+            printf("│");
     }
     for (y = 0; y <= GBOARD_HEIGHT; y++)
     {
         SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 2) * 2 + SIDE_WIDTH * 2, GBOARD_ORIGIN_Y + y);
 
         if (y == GBOARD_HEIGHT)
-            printf("��");
+            printf("┘");
         else if (y == 0)
-            printf("��");
+            printf("┐");
         else
-            printf("��");
+            printf("│");
     }
     for (x = 1; x < SIDE_WIDTH; x++)
     {
         SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 2) * 2 + x * 2, GBOARD_ORIGIN_Y);
-        printf("��");
+        printf("─");
     }
     for (x = 1; x < SIDE_WIDTH; x++)
     {
-        SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 2) * 2 + x * 2, GBOARD_ORIGIN_Y + GBOARD_HEIGHT);
-        printf("��");
+        SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 2) * 2 +x * 2, GBOARD_ORIGIN_Y + GBOARD_HEIGHT);
+        printf("─");
     }
     for (x = 1; x < SIDE_WIDTH; x++)
     {
         SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 2) * 2 + x * 2, GBOARD_ORIGIN_Y + GBOARD_HEIGHT / 4);
-        printf("��");
+        printf("─");
     }
     for (x = 1; x < SIDE_WIDTH; x++)
     {
         SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 2) * 2 + x * 2, GBOARD_ORIGIN_Y + GBOARD_HEIGHT / 4 * 2);
-        printf("��");
+        printf("─");
     }
     for (x = 1; x < SIDE_WIDTH; x++)
     {
         SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 2) * 2 + x * 2, GBOARD_ORIGIN_Y + GBOARD_HEIGHT / 4 * 3);
-        printf("��");
+        printf("─");
     }
 
-    SetCurrentCursorPos(GBOARD_ORIGIN_X + GBOARD_WIDTH - 2, GBOARD_ORIGIN_Y + GBOARD_HEIGHT / 2);
+    SetCurrentCursorPos(GBOARD_ORIGIN_X + 12, GBOARD_ORIGIN_Y + 5);
     printf("");
-    SetCurrentCursorPos(GBOARD_ORIGIN_X + GBOARD_WIDTH - 2, GBOARD_ORIGIN_Y + GBOARD_HEIGHT / 2);
+    SetCurrentCursorPos(GBOARD_ORIGIN_X + 12, GBOARD_ORIGIN_Y + 5);
+    
 }
 
 void GameBoardInfoinitial()
 {
     int x, y;
 
-    for (y = 0; y < GBOARD_HEIGHT + 1; y++)             // �ϴ� ���� 0���� �ʱ�ȭ 
+    for (y = 0; y < GBOARD_HEIGHT + 1; y++)             // 일단 전부 0으로 초기화 
     {
         for (x = 0; x < GBOARD_WIDTH + 2; x++)
             gameBoardInfo[y][x] = 0;
@@ -209,9 +213,10 @@ void BlockRight()
 
     printf("  ");
     curPos.X += 2;
+    SetCurrentCursorPos(curPos.X, curPos.Y);
     printf("");
     SetCurrentCursorPos(curPos.X, curPos.Y);
-    SetCurrentCursorPos(curPos.X, curPos.Y);
+
 }
 
 void BlockLeft()
@@ -226,6 +231,7 @@ void BlockLeft()
     SetCurrentCursorPos(curPos.X, curPos.Y);
     printf("");
     SetCurrentCursorPos(curPos.X, curPos.Y);
+
 }
 
 void BlockUp()
@@ -240,6 +246,7 @@ void BlockUp()
     SetCurrentCursorPos(curPos.X, curPos.Y);
     printf("");
     SetCurrentCursorPos(curPos.X, curPos.Y);
+
 }
 
 void BlockDown()
@@ -254,14 +261,55 @@ void BlockDown()
     SetCurrentCursorPos(curPos.X, curPos.Y);
     printf("");
     SetCurrentCursorPos(curPos.X, curPos.Y);
+
 }
 
-void Blockout()
+void InstallBomb()
 {
     COORD curPos = GetCurrentCursorPos();
 
+    int i = 1;
+    while (i<20) {
+
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), i++);
+        printf("■");
+        Sleep(20);
+        SetCurrentCursorPos(curPos.X, curPos.Y);
+        i++;
+    }
+
+    SetCurrentCursorPos(curPos.X - 2, curPos.Y);
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 5);
+    printf("■■■");
+
+    SetCurrentCursorPos(curPos.X, curPos.Y - 1);
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 5);
+    printf("■");
+
+    SetCurrentCursorPos(curPos.X, curPos.Y + 1);
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 5);
+    printf("■");
+
+    Sleep(100);
+
+    int arrCurX = (curPos.X - GBOARD_ORIGIN_X) / 2;
+    int arrCurY = curPos.Y - GBOARD_ORIGIN_Y;
+
+    if(gameBoardInfo[arrCurY][arrCurX - 1] != 1)
+        gameBoardInfo[arrCurY][arrCurX - 1] = 0;
+    if (gameBoardInfo[arrCurY][arrCurX + 1] != 1)
+        gameBoardInfo[arrCurY][arrCurX + 1] = 0;
+    if (gameBoardInfo[arrCurY - 1][arrCurX] != 1)
+        gameBoardInfo[arrCurY - 1][arrCurX] = 0;
+    if (gameBoardInfo[arrCurY + 1][arrCurX ] != 1)
+        gameBoardInfo[arrCurY + 1][arrCurX] = 0;
+
     SetCurrentCursorPos(curPos.X, curPos.Y);
-    printf("  ");
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+    printf("");
+    SetCurrentCursorPos(curPos.X, curPos.Y);
+
+    RedrawBoard();
 }
 
 
@@ -272,7 +320,7 @@ int DetectCollison(int curX, int curY)
 
     if (gameBoardInfo[arrY][arrX] == 0)
         return 1;
-    return 0;                   //������ ������ 1 ��ȯ
+    return 0;                   //문제가 없으면 1 반환
 }
 
 
@@ -301,13 +349,13 @@ void ProcessKeyInput()
                 BlockDown();
                 break;
             case SPACE:
-                Blockout();
+                InstallBomb();
                 break;
             default:
                 break;
             }
         }
-        //Sleep(10);
+        Sleep(10);
     }
 
 }
@@ -347,9 +395,9 @@ void RedrawBoard()
 void DrawOneStage()
 {
     int i, j;
-    for (int i = 2; i < GBOARD_HEIGHT; i++)
+    for (int i = 2; i < GBOARD_HEIGHT - 1; i++)
     {
-        for (int j = 2; j < GBOARD_HEIGHT; j++)
+        for (int j = 2; j < GBOARD_WIDTH; j++)
         {
             if (i % 2 == 0)
                 gameBoardInfo[i][j] = 2;
@@ -357,18 +405,13 @@ void DrawOneStage()
                 gameBoardInfo[i][j] = 2;
             if (j % 3 == 0)
                 gameBoardInfo[i][j] = 2;
-        }
-    }
-    for (int i = 2; i < GBOARD_HEIGHT; i++)
-    {
-        for (int j = 2; j < GBOARD_HEIGHT; j++)
-        {
             if (i % 4 == j % 4)
                 gameBoardInfo[i][j] = 1;
             if ((GBOARD_HEIGHT - i) % 5 == (j) % 5)
                 gameBoardInfo[i][j] = 2;
         }
     }
+
     for (i = 0; i < 10; i++)
     {
         gameBoardInfo[10 + i][5] = 1;
@@ -384,12 +427,13 @@ void DrawOneStage()
             gameBoardInfo[10][5 + i] = 1;
         }
     }
-    COORD curPos = GetCurrentCursorPos();
-    for (i = 0; i < 4; i++)
+    
+    for (i = 0; i < 5; i++)
     {
-        for (j = 0; j < 4; j++)
+        for (j = 0; j < 5; j++)
         {
-            gameBoardInfo[curPos.Y + i - 5][curPos.X + j + 10] = 0;
+            gameBoardInfo[5 + i - 2][7 + j - 3] = 0;
         }
     }
+
 }
