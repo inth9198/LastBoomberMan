@@ -1,4 +1,4 @@
-#pragma warning(disable : 4996)
+﻿#pragma warning(disable : 4996)
 
 #include <stdio.h>
 #include <windows.h>
@@ -347,9 +347,9 @@ void RedrawBoard()
 void DrawOneStage()
 {
     int i, j;
-    for (int i = 2; i < GBOARD_HEIGHT; i++)
+    for (int i = 2; i < GBOARD_HEIGHT-1; i++)
     {
-        for (int j = 2; j < GBOARD_HEIGHT; j++)
+        for (int j = 2; j < GBOARD_WIDTH ; j++)
         {
             if (i % 2 == 0)
                 gameBoardInfo[i][j] = 2;
@@ -357,18 +357,13 @@ void DrawOneStage()
                 gameBoardInfo[i][j] = 2;
             if (j % 3 == 0)
                 gameBoardInfo[i][j] = 2;
-        }
-    }
-    for (int i = 2; i < GBOARD_HEIGHT; i++)
-    {
-        for (int j = 2; j < GBOARD_HEIGHT; j++)
-        {
             if (i % 4 == j % 4)
                 gameBoardInfo[i][j] = 1;
             if ((GBOARD_HEIGHT - i) % 5 == (j) % 5)
                 gameBoardInfo[i][j] = 2;
         }
     }
+
     for (i = 0; i < 10; i++)
     {
         gameBoardInfo[10 + i][5] = 1;
