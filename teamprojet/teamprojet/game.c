@@ -482,15 +482,9 @@ void RedrawBoard()
 void DrawOneStage()
 {
     int i, j;
-<<<<<<< HEAD
-    for (int i = 2; i < GBOARD_HEIGHT-1; i++)
-    {
-        for (int j = 2; j < GBOARD_WIDTH ; j++)
-=======
     for (int i = 2; i < GBOARD_HEIGHT - 1; i++)
     {
         for (int j = 2; j < GBOARD_WIDTH; j++)
->>>>>>> a733917bcb9899f56d6012aad4626624a924aa83
         {
             if (i % 2 == 0)
                 gameBoardInfo[i][j] = 2;
