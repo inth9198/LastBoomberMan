@@ -22,6 +22,11 @@
 
 int gameBoardInfo[GBOARD_HEIGHT + 1][GBOARD_WIDTH + 2];     // 충돌검사용 필드
 
+int LIFE;
+int bluezonecount;
+double TIME;
+int SCORE;
+
 void SetCurrentCursorPos(int x, int y);
 COORD GetCurrentCursorPos(void);
 
@@ -38,10 +43,14 @@ void ProcessKeyInput();
 void RedrawBoard();
 void DrawOneStage();
 void InstallBomb();
-
+void makeBluehole();
+void nextBluehole(int n);
+void DrawInfo();
 
 int main()
 {
+    int n = 0;
+
     system("mode con cols=110 lines=40");
     system("title LAST BOMBERMAN");
     RemoveCursor();
@@ -52,12 +61,18 @@ int main()
     DrawGameBoard();
 
     DrawOneStage();
+    LIFE = 3;
+    TIME = 60;
+    SCORE = 0;
     //Sleep(1000);
     RedrawBoard();
+
 
     while (1)
     {
         ProcessKeyInput();
+        nextBluehole(n);
+        n++;
     }
 
     getchar();              //종료전 대기시간 화면에 글자 보기 싫어서 만들었습니다.
@@ -97,7 +112,7 @@ void DrawGameTitle() {
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 6);
 
     printf("\n");
-    printf("    ■    ■■  ■■■ ■■■  ■■     ■■   ■■  ■■ ■■   ■■■ ■■    ■■  ■■  ■■  ■    ■\n" );
+    printf("    ■    ■■  ■■■ ■■■  ■■     ■■   ■■  ■■ ■■   ■■■ ■■    ■■  ■■  ■■  ■    ■\n");
     printf("    ■   ■  ■ ■       ■    ■  ■ ■    ■ ■ ■■ ■ ■  ■ ■     ■ ■   ■ ■■ ■ ■  ■ ■■  ■\n");
     printf("    ■   ■■■ ■■■   ■    ■■   ■    ■ ■  ■  ■ ■■   ■■   ■■    ■  ■  ■ ■■■ ■ ■ ■\n");
     printf("    ■   ■  ■     ■   ■    ■  ■ ■    ■ ■  ■  ■ ■  ■ ■     ■ ■   ■  ■  ■ ■  ■ ■  ■■\n");
@@ -176,7 +191,7 @@ void DrawGameBoard()
     }
     for (x = 1; x < SIDE_WIDTH; x++)
     {
-        SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 2) * 2 +x * 2, GBOARD_ORIGIN_Y + GBOARD_HEIGHT);
+        SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 2) * 2 + x * 2, GBOARD_ORIGIN_Y + GBOARD_HEIGHT);
         printf("─");
     }
     for (x = 1; x < SIDE_WIDTH; x++)
@@ -198,14 +213,14 @@ void DrawGameBoard()
     SetCurrentCursorPos(GBOARD_ORIGIN_X + 12, GBOARD_ORIGIN_Y + 5);
     printf("");
     SetCurrentCursorPos(GBOARD_ORIGIN_X + 12, GBOARD_ORIGIN_Y + 5);
-    
+
 }
 
 void GameBoardInfoinitial()
 {
     int x, y;
 
-    for (y = 0; y < GBOARD_HEIGHT + 1; y++)             // 일단 전부 0으로 초기화 
+    for (y = 0; y < GBOARD_HEIGHT; y++)             // 일단 전부 0으로 초기화 
     {
         for (x = 0; x < GBOARD_WIDTH + 2; x++)
             gameBoardInfo[y][x] = 0;
@@ -221,6 +236,7 @@ void GameBoardInfoinitial()
         gameBoardInfo[0][x] = 1;
         gameBoardInfo[GBOARD_HEIGHT][x] = 1;
     }
+    makeBluehole();
 }
 
 void BlockRight()
@@ -260,6 +276,7 @@ void BlockUp()
     if (!DetectCollison(curPos.X, curPos.Y - 1))
         return;
 
+
     printf("  ");
     curPos.Y -= 1;
     SetCurrentCursorPos(curPos.X, curPos.Y);
@@ -275,6 +292,7 @@ void BlockDown()
     if (!DetectCollison(curPos.X, curPos.Y + 1))
         return;
 
+
     printf("  ");
     curPos.Y += 1;
     SetCurrentCursorPos(curPos.X, curPos.Y);
@@ -288,7 +306,7 @@ void InstallBomb()
     COORD curPos = GetCurrentCursorPos();
 
     int i = 1;
-    while (i<20) {
+    while (i < 20) {
 
         SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), i++);
         printf("■");
@@ -314,14 +332,26 @@ void InstallBomb()
     int arrCurX = (curPos.X - GBOARD_ORIGIN_X) / 2;
     int arrCurY = curPos.Y - GBOARD_ORIGIN_Y;
 
-    if(gameBoardInfo[arrCurY][arrCurX - 1] != 1)
+    if (gameBoardInfo[arrCurY][arrCurX - 1] == 2)
+    {
         gameBoardInfo[arrCurY][arrCurX - 1] = 0;
-    if (gameBoardInfo[arrCurY][arrCurX + 1] != 1)
+        SCORE += 10;
+    }
+    if (gameBoardInfo[arrCurY][arrCurX + 1] == 2)
+    {
         gameBoardInfo[arrCurY][arrCurX + 1] = 0;
-    if (gameBoardInfo[arrCurY - 1][arrCurX] != 1)
+        SCORE += 10;
+    }
+    if (gameBoardInfo[arrCurY - 1][arrCurX] == 2)
+    {
         gameBoardInfo[arrCurY - 1][arrCurX] = 0;
-    if (gameBoardInfo[arrCurY + 1][arrCurX ] != 1)
+        SCORE += 10;
+    }
+    if (gameBoardInfo[arrCurY + 1][arrCurX] == 2)
+    {
         gameBoardInfo[arrCurY + 1][arrCurX] = 0;
+        SCORE += 10;
+    }
 
     SetCurrentCursorPos(curPos.X, curPos.Y);
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
@@ -337,18 +367,31 @@ int DetectCollison(int curX, int curY)
     int arrX = (curX - GBOARD_ORIGIN_X) / 2;
     int arrY = curY - GBOARD_ORIGIN_Y;
 
-    if (gameBoardInfo[arrY][arrX] == 0)
+    if ((gameBoardInfo[arrY][arrX] != 1) && (gameBoardInfo[arrY][arrX] != 2))
         return 1;
     return 0;                   //문제가 없으면 1 반환
 }
 
-
+void DrawInfo()
+{
+    COORD  curPos = GetCurrentCursorPos();
+    SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 2) * 2 + 5, GBOARD_ORIGIN_Y + 3);
+    printf("LIFE = %d", LIFE);
+    SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 2) * 2 + 5, GBOARD_ORIGIN_Y + 9);
+    printf("TIME = %.2f", TIME);
+    SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 2) * 2 + 5, GBOARD_ORIGIN_Y + 15);
+    printf("SCORE = %d", (int)(60 - TIME) + SCORE);
+    SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 2) * 2 + 5, GBOARD_ORIGIN_Y + 19);
+    printf("ITEM");
+}
 void ProcessKeyInput()
 {
+    COORD curPos;
     int key, i;
 
-    for (i = 0; i < 100; i++)
+    for (i = 0; i < 500; i++)
     {
+
         if (_kbhit() != 0)
         {
             key = _getch();
@@ -357,15 +400,19 @@ void ProcessKeyInput()
             {
             case LEFT:
                 BlockLeft();
+                RedrawBoard();
                 break;
             case RIGHT:
                 BlockRight();
+                RedrawBoard();
                 break;
             case UP:
                 BlockUp();
+                RedrawBoard();
                 break;
             case DOWN:
                 BlockDown();
+                RedrawBoard();
                 break;
             case SPACE:
                 InstallBomb();
@@ -374,7 +421,22 @@ void ProcessKeyInput()
                 break;
             }
         }
+
+        curPos = GetCurrentCursorPos();
+        SetCurrentCursorPos(GBOARD_ORIGIN_X + (GBOARD_WIDTH + 2) * 2 + 10, GBOARD_ORIGIN_Y + 3);
+        if (gameBoardInfo[curPos.Y - GBOARD_ORIGIN_Y][(curPos.X - GBOARD_ORIGIN_X) / 2] == 5)
+            bluezonecount++;
+        else
+            bluezonecount = 0;
+        if (bluezonecount == 100)
+        {
+            LIFE--;
+            bluezonecount = 0;
+        }
+        DrawInfo();
+        SetCurrentCursorPos(curPos.X, curPos.Y);
         Sleep(10);
+        TIME -= 0.02;
     }
 
 }
@@ -401,6 +463,12 @@ void RedrawBoard()
             else if (gameBoardInfo[y][x] == 2)
             {
                 printf("□");
+            }
+            else if (gameBoardInfo[y][x] == 5)
+            {
+                SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 3);
+                printf("■");
+                SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
             }
             else { printf("  "); }
         }
@@ -446,7 +514,7 @@ void DrawOneStage()
             gameBoardInfo[10][5 + i] = 1;
         }
     }
-    
+
     for (i = 0; i < 5; i++)
     {
         for (j = 0; j < 5; j++)
@@ -455,4 +523,39 @@ void DrawOneStage()
         }
     }
 
+}
+
+void makeBluehole()
+{
+    int x, y;
+
+
+    for (y = 1; y < GBOARD_HEIGHT; y++)
+    {
+        gameBoardInfo[y][1] = 5;
+        gameBoardInfo[y][GBOARD_WIDTH] = 5;
+    }
+    for (x = 1; x <= GBOARD_WIDTH; x++)
+    {
+        gameBoardInfo[1][x] = 5;
+        gameBoardInfo[GBOARD_HEIGHT - 1][x] = 5;
+    }
+}
+
+void nextBluehole(int n)
+{
+    int x, y;
+
+
+    for (y = 1; y < GBOARD_HEIGHT; y++)
+    {
+        gameBoardInfo[y][1 + n] = 5;
+        gameBoardInfo[y][GBOARD_WIDTH - n] = 5;
+    }
+    for (x = 1; x <= GBOARD_WIDTH; x++)
+    {
+        gameBoardInfo[1 + n][x] = 5;
+        gameBoardInfo[GBOARD_HEIGHT - 1 - n][x] = 5;
+    }
+    RedrawBoard();
 }
